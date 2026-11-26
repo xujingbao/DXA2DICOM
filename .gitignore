@@ -4,6 +4,7 @@
 !.github/
 !.github/**
 !requirements.txt
+!README.md
 !dxa_converter/
 !dxa_converter/**
 __pycache__/
