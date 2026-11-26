@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DXA2DICOM · Hologic 骨密度原始影像转换工具</title>
-<meta name="description" content="将 Hologic DXA 骨密度仪的私有归档文件，还原为带完整采集参数的 16 位标准 DICOM 影像，可直接导入 PACS。">
+<meta name="description" content="将 Hologic DXA 骨密度仪的私有归档文件，还原为带成像参数的 16 位标准 DICOM 文件，供科研分析使用。">
 <style>
 :root{--ink:#141414;--ink-2:#5b5b5b;--ink-3:#8c8c8c;--line:#e6e6e6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -60,7 +60,7 @@ footer{padding:36px 0 64px;border-top:1px solid var(--line)}
 <header>
   <div class="wrap hd">
     <div class="brand">DXA2DICOM</div>
-    <div class="ver">v0.2.0</div>
+    <div class="ver">v0.2.1</div>
   </div>
 </header>
 
@@ -69,7 +69,7 @@ footer{padding:36px 0 64px;border-top:1px solid var(--line)}
   <div class="hero">
     <h1>DXA 原始影像<br>转换为标准 DICOM</h1>
     <p class="lead">
-      读取 Hologic 骨密度仪归档文件中的 16 位原始像素与采集参数，输出符合 DICOM 3.0 的影像，可直接导入 PACS，也可作为模型训练数据源。
+      读取 Hologic 骨密度仪归档文件（.p / .r）中的 16 位原始探测器计数与成像参数，输出标准 DICOM 文件，可作为科研分析与模型训练的数据源。
     </p>
     <div class="actions">
       <a class="btn" href="/download/#windows">Windows 版</a>
@@ -81,10 +81,11 @@ footer{padding:36px 0 64px;border-top:1px solid var(--line)}
   <section>
     <h2>功能</h2>
     <dl>
-      <dt>原始格式解析</dt><dd>读取 16 位像素、像素间距、患者信息与校准参数</dd>
-      <dt>影像校正</dt><dd>探测器增益不均与通道拼接痕迹校正</dd>
-      <dt>标准 DICOM</dt><dd>DICOM 3.0，双能两幅同属一个序列，可直接导入 PACS</dd>
-      <dt>定量结果</dt><dd>骨密度 BMD（g/cm²）、T 值、Z 值</dd>
+      <dt>原始格式解析</dt><dd>读取 16 位原始计数、患者与检查信息</dd>
+      <dt>标准 DICOM</dt><dd>各数据块写成多帧 DICOM，每帧一个通道，像素值不做缩放</dd>
+      <dt>成像参数</dt><dd>设备配置、校准与分析参数原样保留（DICOM 私有标签），界面可查看、可搜索</dd>
+      <dt>预览</dt><dd>转换前预览各通道灰度图，可切换逐通道拉伸与统一窗宽</dd>
+      <dt>匿名化</dt><dd>默认不写入姓名与出生日期，患者 ID 改为哈希值</dd>
       <dt>批量处理</dt><dd>整目录或压缩包导入，自动配对成一次检查</dd>
       <dt>离线运行</dt><dd>不联网，患者数据不出本机</dd>
     </dl>
@@ -93,9 +94,8 @@ footer{padding:36px 0 64px;border-top:1px solid var(--line)}
   <section>
     <h2>规格</h2>
     <dl>
-      <dt>支持设备</dt><dd>Hologic Discovery 系列，其余型号逐步适配</dd>
-      <dt>支持部位</dt><dd>脊柱、髋部、前臂、全身</dd>
-      <dt>输出</dt><dd>DICOM 3.0 影像、骨密度定量结果表</dd>
+      <dt>已验证样本</dt><dd>Hologic 骨密度仪脊柱类扫描归档文件；其他设备型号与扫描部位尚未验证</dd>
+      <dt>输出</dt><dd>多帧 DICOM（Secondary Capture）；不含 BMD、T 值、Z 值等分析结果</dd>
       <dt>系统要求</dt><dd>Windows 10 / 11（64 位）、macOS 11 及以上</dd>
     </dl>
   </section>
