@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DXA2DICOM · Hologic 骨密度原始影像转换工具</title>
+<meta name="description" content="将 Hologic DXA 骨密度仪的私有归档文件，还原为带完整采集参数的 16 位标准 DICOM 影像，可直接导入 PACS。">
+<style>
+:root{--ink:#141414;--ink-2:#5b5b5b;--ink-3:#8c8c8c;--line:#e6e6e6}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  color:var(--ink);background:#fff;font-size:14px;line-height:1.75;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding:0 28px}
+
+header{border-bottom:1px solid var(--line)}
+.hd{display:flex;align-items:center;justify-content:space-between;height:60px}
+.brand{font-size:14px;font-weight:500}
+.ver{font-size:12px;color:var(--ink-3)}
+
+.hero{padding:60px 0 52px;border-bottom:1px solid var(--line)}
+h1{font-size:32px;line-height:1.4;font-weight:500;letter-spacing:-.01em}
+.lead{margin-top:20px;font-size:15px;color:var(--ink-2);max-width:560px}
+.actions{margin-top:36px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.btn{display:inline-block;flex:none;white-space:nowrap;background:var(--ink);color:#fff;
+  text-decoration:none;padding:12px 26px;font-size:14px;border:1px solid var(--ink)}
+.btn:hover{background:#2e2e2e}
+.btn-ghost{background:#fff;color:var(--ink)}
+.btn-ghost:hover{background:#f4f4f4}
+.meta{font-size:12px;color:var(--ink-3)}
+
+section{padding:44px 0;border-bottom:1px solid var(--line)}
+h2{font-size:12px;letter-spacing:.12em;color:var(--ink-3);font-weight:400;margin-bottom:18px}
+dl{display:grid;grid-template-columns:150px 1fr}
+dt,dd{padding:13px 0;border-top:1px solid #f0f0f0;font-size:14px}
+dt{color:var(--ink-3)}
+dd{color:#2e2e2e}
+dl dt:first-of-type,dl dd:first-of-type{border-top:none;padding-top:0}
+
+.note{font-size:13px;color:var(--ink-2);padding:40px 0}
+.note strong{font-weight:500;color:var(--ink)}
+
+footer{padding:36px 0 64px;border-top:1px solid var(--line)}
+.foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:12px;color:var(--ink-3)}
+
+@media(max-width:640px){
+  .wrap{padding:0 20px}
+  .hero{padding:48px 0 44px}
+  h1{font-size:25px}
+  .lead{font-size:14px}
+  section{padding:38px 0}
+  dl{grid-template-columns:1fr}
+  dt{padding-bottom:0;border-top:none;color:var(--ink-3);font-size:12px}
+  dd{padding-top:5px;border-top:none;padding-bottom:18px}
+  dl dd:last-of-type{padding-bottom:0}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap hd">
+    <div class="brand">DXA2DICOM</div>
+    <div class="ver">v0.2.0</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <h1>DXA 原始影像<br>转换为标准 DICOM</h1>
+    <p class="lead">
+      读取 Hologic 骨密度仪归档文件中的 16 位原始像素与采集参数，输出符合 DICOM 3.0 的影像，可直接导入 PACS，也可作为模型训练数据源。
+    </p>
+    <div class="actions">
+      <a class="btn" href="/download/#windows">Windows 版</a>
+      <a class="btn btn-ghost" href="/download/#mac">macOS 版</a>
+    </div>
+    <p class="meta" style="margin-top:16px">离线运行，患者数据不出本机</p>
+  </div>
+
+  <section>
+    <h2>功能</h2>
+    <dl>
+      <dt>原始格式解析</dt><dd>读取 16 位像素、像素间距、患者信息与校准参数</dd>
+      <dt>影像校正</dt><dd>探测器增益不均与通道拼接痕迹校正</dd>
+      <dt>标准 DICOM</dt><dd>DICOM 3.0，双能两幅同属一个序列，可直接导入 PACS</dd>
+      <dt>定量结果</dt><dd>骨密度 BMD（g/cm²）、T 值、Z 值</dd>
+      <dt>批量处理</dt><dd>整目录或压缩包导入，自动配对成一次检查</dd>
+      <dt>离线运行</dt><dd>不联网，患者数据不出本机</dd>
+    </dl>
+  </section>
+
+  <section>
+    <h2>规格</h2>
+    <dl>
+      <dt>支持设备</dt><dd>Hologic Discovery 系列，其余型号逐步适配</dd>
+      <dt>支持部位</dt><dd>脊柱、髋部、前臂、全身</dd>
+      <dt>输出</dt><dd>DICOM 3.0 影像、骨密度定量结果表</dd>
+      <dt>系统要求</dt><dd>Windows 10 / 11（64 位）、macOS 11 及以上</dd>
+    </dl>
+  </section>
+
+  <div class="note">
+    <strong>本工具输出仅供科研与数据分析使用，不得用于临床诊断。</strong><br>
+    使用人体研究数据应取得伦理委员会批准，并对患者身份信息做脱敏处理。
+  </div>
+
+</div>
+
+<footer>
+  <div class="wrap foot">
+    <div>DXA2DICOM</div>
+    <div>骨密度影像标准化转换工具</div>
+  </div>
+</footer>
+
+</body>
+</html>

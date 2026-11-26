@@ -7,5 +7,7 @@
 !README.md
 !dxa_converter/
 !dxa_converter/**
+!web/
+!web/**
 __pycache__/
 *.pyc

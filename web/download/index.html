@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>下载 · DXA2DICOM</title>
+<style>
+:root{--ink:#141414;--ink-2:#5b5b5b;--ink-3:#8c8c8c;--line:#e6e6e6}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  color:var(--ink);background:#fff;font-size:14px;line-height:1.75;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding:0 28px}
+
+header{border-bottom:1px solid var(--line)}
+.hd{display:flex;align-items:center;justify-content:space-between;height:60px}
+.brand{font-size:14px;font-weight:500}
+.brand a{color:var(--ink-3);text-decoration:none;font-weight:400;font-size:13px;margin-left:14px}
+.ver{font-size:12px;color:var(--ink-3)}
+
+main{padding:60px 0 72px}
+h1{font-size:26px;font-weight:500;margin-bottom:10px}
+.sub{color:var(--ink-2)}
+
+section{padding:38px 0;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:none}
+h2{font-size:12px;letter-spacing:.12em;color:var(--ink-3);font-weight:400;margin-bottom:18px}
+
+dl{display:grid;grid-template-columns:110px 1fr}
+dt,dd{padding:11px 0;border-top:1px solid #f0f0f0;font-size:14px}
+dt{color:var(--ink-3)}
+dd{color:#2e2e2e}
+dl dt:first-of-type,dl dd:first-of-type{border-top:none;padding-top:0}
+
+.actions{margin-top:24px;display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-block;flex:none;white-space:nowrap;background:var(--ink);color:#fff;text-decoration:none;
+  padding:11px 26px;font-size:14px;border:1px solid var(--ink)}
+.btn:hover{background:#2e2e2e}
+.btn-ghost{background:#fff;color:var(--ink)}
+.btn-ghost:hover{background:#f4f4f4}
+
+.tip{margin-top:14px;font-size:13px;color:var(--ink-3)}
+
+.warn{margin-top:6px;padding-top:26px;font-size:13px;color:var(--ink-2)}
+.warn strong{font-weight:500;color:var(--ink)}
+
+@media(max-width:640px){
+  .wrap{padding:0 20px}
+  main{padding:44px 0 56px}
+  h1{font-size:22px}
+  section{padding:30px 0}
+  dl{grid-template-columns:1fr}
+  dt{padding-bottom:0;border-top:none;font-size:12px}
+  dd{padding-top:4px;padding-bottom:14px;border-top:none}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap hd">
+    <div class="brand">DXA2DICOM<a href="/">返回首页</a></div>
+    <div class="ver">v0.2.0</div>
+  </div>
+</header>
+
+<div class="wrap">
+<main>
+  <h1>下载</h1>
+  <p class="sub">离线运行，患者数据不出本机。</p>
+
+  <section id="windows">
+    <h2>WINDOWS</h2>
+    <dl>
+      <dt>版本</dt><dd>0.2.0（内测）</dd>
+      <dt>适用系统</dt><dd>Windows 10 / 11 · 64 位</dd>
+      <dt>文件</dt><dd>DXA2DICOM-0.2.0-win-x64.zip · 68 MB</dd>
+    </dl>
+    <div class="actions">
+      <a class="btn" href="/download/DXA2DICOM-0.2.0-win-x64.zip">下载</a>
+    </div>
+    <p class="tip">解压后双击 DXA2DICOM.exe 运行，免安装。首次运行如被 Defender 拦下，选择「仍要运行」。</p>
+  </section>
+
+  <section id="mac">
+    <h2>MACOS</h2>
+    <dl>
+      <dt>版本</dt><dd>0.2.0（内测）</dd>
+      <dt>适用系统</dt><dd>macOS 11 及以上</dd>
+      <dt>Apple 芯片</dt><dd>M1 及以后机型 · 55 MB</dd>
+      <dt>Intel 芯片</dt><dd>2020 年及以前机型 · 60 MB</dd>
+    </dl>
+    <div class="actions">
+      <a class="btn" href="/download/DXA2DICOM-0.2.0-macos-arm64.dmg">下载 Apple 芯片版</a>
+      <a class="btn btn-ghost" href="/download/DXA2DICOM-0.2.0-macos-x64.dmg">下载 Intel 芯片版</a>
+    </div>
+    <p class="tip">打开 DMG 后把 DXA2DICOM 拖入「应用程序」。未签名版本首次打开会被系统拦下，需在「系统设置 → 隐私与安全性」底部点按「仍要打开」。</p>
+  </section>
+
+  <div class="warn">
+    <strong>本软件输出仅供科研与数据分析使用，不得用于临床诊断。</strong><br>
+    使用人体研究数据应取得伦理委员会批准并完成患者信息脱敏。
+  </div>
+</main>
+</div>
+</body>
+</html>
