@@ -1,0 +1,10 @@
+# 白名单:只提交应用源码。样本数据含真实患者信息,绝不入库。
+*
+!.gitignore
+!.github/
+!.github/**
+!requirements.txt
+!dxa_converter/
+!dxa_converter/**
+__pycache__/
+*.pyc
