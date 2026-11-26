@@ -10,6 +10,7 @@ from typing import Callable, List, Optional
 from dxa_converter.dicom_writer import make_study_uid, write_raw_dicom
 from dxa_converter.discovery import ScanPair, extract_zip, find_scan_pairs
 from dxa_converter.exam_reader import read_exam_info
+from dxa_converter.params_reader import read_param_sections
 from dxa_converter.raw_reader import read_raw_blocks
 from dxa_converter.records import HologicFormatError
 
@@ -50,6 +51,7 @@ def convert_pair(pair: ScanPair, out_dir: Path, anonymize: bool) -> List[Path]:
     """
     exam = read_exam_info(pair.exam_path)
     blocks = read_raw_blocks(pair.raw_path)
+    sections = read_param_sections(pair.exam_path)
     study_uid = make_study_uid(exam)
     source_name = pair.raw_path.name
     target = out_dir / f"{pair.stem}_{pair.code}"
@@ -61,6 +63,7 @@ def convert_pair(pair: ScanPair, out_dir: Path, anonymize: bool) -> List[Path]:
             source_name,
             study_uid,
             anonymize,
+            sections,
         )
         for block in blocks
     ]

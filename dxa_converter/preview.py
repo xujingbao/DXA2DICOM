@@ -25,6 +25,8 @@ from qfluentwidgets import (
 
 from dxa_converter.discovery import ScanPair
 from dxa_converter.exam_reader import read_exam_info
+from dxa_converter.params_panel import ParamsPanel
+from dxa_converter.params_reader import exam_rows, read_param_sections
 from dxa_converter.raw_reader import RawBlock, read_raw_blocks
 from dxa_converter.records import HologicFormatError
 
@@ -215,5 +217,19 @@ class PreviewPanel(QWidget):
             chan, rows, cols = block.frames.shape
             self._pages.addWidget(_block_page(block, self, self._stretch_switch.isChecked()))
             self._segments.addItem(str(index), f"{block.name}  {chan}×{rows}×{cols}")
+        self._add_params_page(pair, len(blocks))
         self._segments.setCurrentItem("0")
         self._status.setText(f"{pair.raw_path.name}: {len(blocks)} 个数据块")
+
+    def _add_params_page(self, pair: ScanPair, index: int) -> None:
+        """最后一个页签:成像参数。"""
+        try:
+            exam_items = exam_rows(read_exam_info(pair.exam_path))
+            sections = read_param_sections(pair.exam_path)
+        except (HologicFormatError, OSError) as exc:
+            self._status.setText(f"参数读取失败: {exc}")
+            return
+        panel = ParamsPanel()
+        panel.set_data(exam_items, sections)
+        self._pages.addWidget(panel)
+        self._segments.addItem(str(index), "成像参数")

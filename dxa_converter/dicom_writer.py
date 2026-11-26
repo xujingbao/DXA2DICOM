@@ -6,7 +6,7 @@
 
 import hashlib
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Sequence
 
 from pydicom.dataset import Dataset, FileMetaDataset
 from pydicom.uid import (
@@ -17,11 +17,14 @@ from pydicom.uid import (
 )
 
 from dxa_converter.exam_reader import ExamInfoSchema
+from dxa_converter.params_reader import ParamSection
 from dxa_converter.raw_reader import RawBlock
 
 SERIES_NUMBER_BY_BLOCK = {"CA": 1, "DE": 2}
 UID_PREFIX = "2.25."
 ANONYMOUS_NAME = "ANONYMOUS"
+PRIVATE_GROUP = 0x0029
+PRIVATE_CREATOR = "DXA2DICOM"
 
 
 def _entropy_key(exam: ExamInfoSchema) -> str:
@@ -93,6 +96,17 @@ def _comments(block: RawBlock, exam: ExamInfoSchema, source_name: str) -> str:
     return "; ".join(parts)
 
 
+def _fill_private_params(ds: Dataset, sections: Sequence[ParamSection]) -> None:
+    """把原样提取的成像/校准/分析参数写入私有标签 (0029,xx01..)。
+
+    每个分组一个 UT 元素,内容为 ``key = value`` 逐行文本;参数含义以 Hologic 为准。
+    """
+    block = ds.private_block(PRIVATE_GROUP, PRIVATE_CREATOR, create=True)
+    for index, section in enumerate(sections, start=1):
+        text = "\n".join(f"{key} = {value}" for key, value in section.items)
+        block.add_new(index, "UT", f"[{section.title}]\n{text}")
+
+
 def write_raw_dicom(
     block: RawBlock,
     exam: ExamInfoSchema,
@@ -100,6 +114,7 @@ def write_raw_dicom(
     source_name: str,
     study_uid: str,
     anonymize: bool,
+    sections: Sequence[ParamSection] = (),
 ) -> Path:
     """把一个原始数据块写成 DICOM 文件。
 
@@ -110,6 +125,7 @@ def write_raw_dicom(
         source_name: 源文件名(写入 ImageComments 便于追溯)。
         study_uid: 同一次检查共用的 Study Instance UID。
         anonymize: True 时不写入姓名与出生日期,患者 ID 改为哈希值。
+        sections: 原样提取的参数分组,写入私有标签。
 
     Returns:
         实际写入的路径。
@@ -144,6 +160,8 @@ def write_raw_dicom(
     ds.InstanceNumber = 1
     ds.SeriesDescription = f"Hologic DXA raw counts {block.name}"
     ds.ImageComments = _comments(block, exam, source_name)
+    if sections:
+        _fill_private_params(ds, sections)
 
     chan, rows, cols = block.frames.shape
     ds.SamplesPerPixel = 1
