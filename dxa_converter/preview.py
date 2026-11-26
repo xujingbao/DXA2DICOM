@@ -1,6 +1,6 @@
 """预览面板:列出扫描,并把原始计数的各通道渲染成灰度图。"""
 
-from typing import List
+from typing import List, Optional, Tuple
 
 import numpy as np
 from PySide6.QtCore import Qt, Signal
@@ -8,6 +8,7 @@ from PySide6.QtGui import QImage, QMouseEvent, QPixmap
 from PySide6.QtWidgets import (
     QDialog,
     QGridLayout,
+    QHBoxLayout,
     QLabel,
     QStackedWidget,
     QVBoxLayout,
@@ -19,6 +20,7 @@ from qfluentwidgets import (
     SegmentedWidget,
     SmoothScrollArea,
     StrongBodyLabel,
+    SwitchButton,
 )
 
 from dxa_converter.discovery import ScanPair
@@ -32,16 +34,26 @@ ENLARGED_SIZE = (760, 760)
 WINDOW_PERCENTILES = (1.0, 99.0)
 
 
-def frame_to_qimage(frame: np.ndarray) -> QImage:
-    """把单个通道按 1%-99% 分位拉伸为 8 位灰度图(仅用于显示,不影响导出)。
+Window = Tuple[float, float]
+
+
+def compute_window(data: np.ndarray) -> Window:
+    """按 1%-99% 分位数计算显示窗口(仅用于显示,不影响导出)。"""
+    lo, hi = np.percentile(data, WINDOW_PERCENTILES)
+    return float(lo), float(hi)
+
+
+def frame_to_qimage(frame: np.ndarray, window: Optional[Window] = None) -> QImage:
+    """把单个通道线性映射为 8 位灰度图(仅用于显示,不影响导出)。
 
     Args:
         frame: 形状 (行, 列) 的 uint16 数组。
+        window: 显示窗口 (下限, 上限);None 时按该通道自身的 1%-99% 分位数。
 
     Returns:
         灰度 QImage。
     """
-    lo, hi = np.percentile(frame, WINDOW_PERCENTILES)
+    lo, hi = window if window is not None else compute_window(frame)
     scaled = (frame.astype(np.float32) - lo) / max(float(hi - lo), 1.0)
     gray = np.ascontiguousarray((np.clip(scaled, 0.0, 1.0) * 255).astype(np.uint8))
     rows, cols = gray.shape
@@ -100,14 +112,15 @@ def _thumbnail(title: str, image: QImage, panel: QWidget) -> QWidget:
     return cell
 
 
-def _block_page(block: RawBlock, panel: QWidget) -> QWidget:
+def _block_page(block: RawBlock, panel: QWidget, per_channel: bool) -> QWidget:
     content = QWidget()
     content.setStyleSheet("background: transparent;")
     grid = QGridLayout(content)
+    shared = None if per_channel else compute_window(block.frames)
     for index in range(block.frames.shape[0]):
         frame = block.frames[index]
         title = f"{block.name} 通道 {index} · {frame.shape[0]}×{frame.shape[1]}"
-        cell = _thumbnail(title, frame_to_qimage(frame), panel)
+        cell = _thumbnail(title, frame_to_qimage(frame, shared), panel)
         grid.addWidget(cell, index // GRID_COLUMNS, index % GRID_COLUMNS)
     scroll = SmoothScrollArea()
     scroll.setWidgetResizable(True)
@@ -129,11 +142,19 @@ class PreviewPanel(QWidget):
         self._pages = QStackedWidget()
         self._segments.currentItemChanged.connect(self._on_segment)
         self._status = CaptionLabel("选择输入后在此预览")
-        hint = CaptionLabel("预览仅用于目测,已按 1%–99% 拉伸;点击缩略图可放大")
+        hint = CaptionLabel("预览仅用于目测,不影响导出;点击缩略图可放大")
+        self._stretch_switch = SwitchButton()
+        self._stretch_switch.setOnText("逐通道拉伸(1%–99%)")
+        self._stretch_switch.setOffText("统一窗宽(通道间亮度可比)")
+        self._stretch_switch.setChecked(True)
+        self._stretch_switch.checkedChanged.connect(self._refresh)
+        options = QHBoxLayout()
+        options.addWidget(hint, 1)
+        options.addWidget(self._stretch_switch)
         layout = QVBoxLayout(self)
         layout.addWidget(StrongBodyLabel("预览"))
         layout.addWidget(self._list)
-        layout.addWidget(hint)
+        layout.addLayout(options)
         layout.addWidget(self._segments, 0, Qt.AlignmentFlag.AlignLeft)
         layout.addWidget(self._pages, 1)
         layout.addWidget(self._status)
@@ -170,6 +191,13 @@ class PreviewPanel(QWidget):
             self._pages.removeWidget(page)
             page.deleteLater()
 
+    def _refresh(self, _checked: bool) -> None:
+        """切换显示模式后重新渲染当前扫描,并保持当前数据块页签。"""
+        current = self._pages.currentIndex()
+        self._show(self._list.currentRow())
+        if 0 <= current < self._pages.count():
+            self._segments.setCurrentItem(str(current))
+
     def _on_segment(self, route_key: str) -> None:
         self._pages.setCurrentIndex(int(route_key))
 
@@ -185,7 +213,7 @@ class PreviewPanel(QWidget):
             return
         for index, block in enumerate(blocks):
             chan, rows, cols = block.frames.shape
-            self._pages.addWidget(_block_page(block, self))
+            self._pages.addWidget(_block_page(block, self, self._stretch_switch.isChecked()))
             self._segments.addItem(str(index), f"{block.name}  {chan}×{rows}×{cols}")
         self._segments.setCurrentItem("0")
         self._status.setText(f"{pair.raw_path.name}: {len(blocks)} 个数据块")
